@@ -199,3 +199,7 @@ NOTE: `successCondition` is configurable.
 ## Credit
 
 The development of this plugin was inspired by the [Argo Rollouts Prometheus Metric Plugin](https://github.com/argoproj-labs/rollouts-plugin-metric-sample-prometheus). Leveraging the knowledge and design principles from the Prometheus plugin, this OpenSearch Metric Plugin was created to provide similar functionality for OpenSearch metrics. The foundational concepts and architecture were adapted to suit the specific requirements and capabilities of OpenSearch, ensuring seamless integration and reliable performance within the Argo Rollouts ecosystem.
+
+## Licence
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
