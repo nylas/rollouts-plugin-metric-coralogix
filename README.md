@@ -195,3 +195,7 @@ Opensearch query should response like below:
 The `successCondition` checks that the error count in the last 5 minutes should be lower than or equal to the error count in the previous 5 minutes.
 
 NOTE: `successCondition` is configurable.
+
+## Credit
+
+The development of this plugin was inspired by the [Argo Rollouts Prometheus Metric Plugin](https://github.com/argoproj-labs/rollouts-plugin-metric-sample-prometheus). Leveraging the knowledge and design principles from the Prometheus plugin, this OpenSearch Metric Plugin was created to provide similar functionality for OpenSearch metrics. The foundational concepts and architecture were adapted to suit the specific requirements and capabilities of OpenSearch, ensuring seamless integration and reliable performance within the Argo Rollouts ecosystem.
