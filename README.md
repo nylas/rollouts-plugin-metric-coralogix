@@ -113,7 +113,10 @@ spec:
         plugin:
           argoproj-labs/opensearch-metric-plugin:
             address: http://localhost:9200
-            step: 1m
+            username: foo
+            password: bar
+            insecureSkipVerify: false
+            index: sample-index
             query: |
               {
                 "size": 0,
