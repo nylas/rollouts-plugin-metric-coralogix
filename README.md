@@ -88,6 +88,11 @@ data:
 
 ### Sample Analysis Template
 
+The `successCondition` checks that the error count in the last 5 minutes should be lower than or equal to the error count in the previous 5 minutes.
+
+> [!INFO]
+> Note: The fields `successCondition`, `"gte": "now-10m/m"`, `"fixed_interval": "5m"`, and `"Level": "Error"` can be configured by your check actions. For example, if you want to check the **"Warning"** log count over the last 15 minutes, you can adjust these fields accordingly: set `"gte": "now-30m/m"`, `"fixed_interval": "15m"`, and `"Level": "Warning"`.
+
 An example for this sample plugin below.
 
 ```
@@ -166,14 +171,6 @@ Opensearch query should response like below:
     "logs_per_5min": {
       "buckets": [
         {
-          "key_as_string": "2024-10-25T13:55:00.000Z",
-          "key": 1729864500000,
-          "doc_count": 57992,
-          "error_logs": {
-            "doc_count": 0
-          }
-        },
-        {
           "key_as_string": "2024-10-25T14:00:00.000Z",
           "key": 1729864800000,
           "doc_count": 523779,
@@ -194,10 +191,6 @@ Opensearch query should response like below:
   }
 }
 ```
-
-The `successCondition` checks that the error count in the last 5 minutes should be lower than or equal to the error count in the previous 5 minutes.
-
-NOTE: `successCondition` is configurable.
 
 ## Credit
 
