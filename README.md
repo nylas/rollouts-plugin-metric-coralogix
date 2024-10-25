@@ -1,5 +1,8 @@
 # rollouts-plugin-metric-opensearch
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/selcukusta/rollouts-plugin-metric-opensearch)](https://goreportcard.com/report/github.com/selcukusta/rollouts-plugin-metric-opensearch)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/selcukusta/rollouts-plugin-metric-opensearch/blob/master/LICENSE)
+
 The `rollouts-plugin-metric-opensearch` is an OpenSearch plugin designed for use with the Argo Rollouts plugin system. This plugin enables the integration of OpenSearch metrics into Argo Rollouts, allowing for advanced metric analysis and monitoring during application rollouts.
 
 > [!IMPORTANT]
@@ -199,7 +202,3 @@ NOTE: `successCondition` is configurable.
 ## Credit
 
 The development of this plugin was inspired by the [Argo Rollouts Prometheus Metric Plugin](https://github.com/argoproj-labs/rollouts-plugin-metric-sample-prometheus). Leveraging the knowledge and design principles from the Prometheus plugin, this OpenSearch Metric Plugin was created to provide similar functionality for OpenSearch metrics. The foundational concepts and architecture were adapted to suit the specific requirements and capabilities of OpenSearch, ensuring seamless integration and reliable performance within the Argo Rollouts ecosystem.
-
-## Licence
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
