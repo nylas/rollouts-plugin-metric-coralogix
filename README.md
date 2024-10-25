@@ -2,6 +2,9 @@
 
 The `rollouts-plugin-metric-opensearch` is an OpenSearch plugin designed for use with the Argo Rollouts plugin system. This plugin enables the integration of OpenSearch metrics into Argo Rollouts, allowing for advanced metric analysis and monitoring during application rollouts.
 
+> [!IMPORTANT]
+> The OpenSearch Metric Plugin relies on aggregation query results to function correctly. Aggregation queries in OpenSearch allow for the computation of metrics, such as averages, sums, and counts, over a set of documents. This plugin specifically requires the presence of an aggregation block in the query results to operate. If the query results do not contain an aggregation block, the plugin will be unable to process the data and will not function as intended. Therefore, it is essential to ensure that all queries used with this plugin include the necessary aggregation blocks to enable accurate metric analysis and monitoring.
+
 ## Features
 
 - **Metric Integration:** Seamlessly integrates OpenSearch metrics with Argo Rollouts.
@@ -82,7 +85,7 @@ data:
 
 ### Sample Analysis Template
 
-An example for this sample plugin below...
+An example for this sample plugin below.
 
 ```
 apiVersion: argoproj.io/v1alpha1
