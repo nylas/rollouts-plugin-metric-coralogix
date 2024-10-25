@@ -112,7 +112,7 @@ spec:
       provider:
         plugin:
           argoproj-labs/opensearch-metric-plugin:
-            address: http://localhost:9200
+            address: http://localhost:9200/
             username: foo
             password: bar
             insecureSkipVerify: false
