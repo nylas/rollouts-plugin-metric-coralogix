@@ -1,4 +1,4 @@
-module github.com/selcukusta/rollouts-plugin-metric-opensearch
+module github.com/argoproj-labs/rollouts-plugin-metric-opensearch
 
 go 1.21
 

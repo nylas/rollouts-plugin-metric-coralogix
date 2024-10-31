@@ -1,7 +1,7 @@
 # rollouts-plugin-metric-opensearch
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/selcukusta/rollouts-plugin-metric-opensearch)](https://goreportcard.com/report/github.com/selcukusta/rollouts-plugin-metric-opensearch)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/selcukusta/rollouts-plugin-metric-opensearch/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/argoproj-labs/rollouts-plugin-metric-opensearch)](https://goreportcard.com/report/github.com/argoproj-labs/rollouts-plugin-metric-opensearch)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/argoproj-labs/rollouts-plugin-metric-opensearch/blob/master/LICENSE)
 
 The `rollouts-plugin-metric-opensearch` is an OpenSearch plugin designed for use with the Argo Rollouts plugin system. This plugin enables the integration of OpenSearch metrics into Argo Rollouts, allowing for advanced metric analysis and monitoring during application rollouts.
 
@@ -82,7 +82,7 @@ data:
   plugins: |-
     metrics:
     - name: "argoproj-labs/opensearch-metric-plugin" # name of the plugin uses the name to find this configuration, it must match the name required by the plugin
-      location: "https://github.com/selcukusta/rollouts-plugin-metric-opensearch/releases/download/v0.0.1/rollouts-plugin-metric-opensearch-linux-amd64" # supports http(s):// urls and file://
+      location: "https://github.com/argoproj-labs/rollouts-plugin-metric-opensearch/releases/download/v0.0.1/rollouts-plugin-metric-opensearch-linux-amd64" # supports http(s):// urls and file://
       sha256: "08f588b1c799a37bbe8d0fc74cc1b1492dd70b2c" #optional sha256 checksum of the plugin executable
 ```
 

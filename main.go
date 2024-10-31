@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/argoproj-labs/rollouts-plugin-metric-opensearch/internal/plugin"
 	rolloutsPlugin "github.com/argoproj/argo-rollouts/metricproviders/plugin/rpc"
 	goPlugin "github.com/hashicorp/go-plugin"
-	"github.com/selcukusta/rollouts-plugin-metric-opensearch/internal/plugin"
 	log "github.com/sirupsen/logrus"
 )
 
