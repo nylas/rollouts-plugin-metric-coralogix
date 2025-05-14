@@ -25,7 +25,7 @@ var testHandshake = goPlugin.HandshakeConfig{
 }
 
 func pluginClient(t *testing.T) (rpc.MetricProviderPlugin, goPlugin.ClientProtocol, func(), chan struct{}) {
-	logCtx := *log.WithFields(log.Fields{"plugin-test": "opensearch"})
+	logCtx := *log.WithFields(log.Fields{"plugin-test": "coralogix"})
 	ctx, cancel := context.WithCancel(context.Background())
 
 	rpcPluginImp := &RpcPlugin{
@@ -95,46 +95,10 @@ func TestRunIteration(t *testing.T) {
 		t.Fail()
 	}
 
-	insecureSkipVerify, getBoolErr := env.GetBool("OPENSEARCH_INSECURE_SKIP_VERIFY", true)
-	if getBoolErr != nil {
-		insecureSkipVerify = true
-	}
-
 	msg := map[string]interface{}{
-		"address":            env.GetString("OPENSEARCH_ADDRESS", "http://localhost:9200"),
-		"username":           env.GetString("OPENSEARCH_USERNAME", ""),
-		"password":           env.GetString("OPENSEARCH_PASSWORD", ""),
-		"insecureSkipVerify": insecureSkipVerify,
-		"index":              env.GetString("OPENSEARCH_INDEX", "sample-index"),
-		"query": env.GetString("OPENSEARCH_QUERY", `
-		{
-			"size": 0,
-			"query": {
-				"range": {
-				"@timestamp": {
-					"gte": "now-10m/m",
-					"lt": "now/m"
-				}
-				}
-			},
-			"aggs": {
-				"logs_per_5min": {
-				"date_histogram": {
-					"field": "@timestamp",
-					"fixed_interval": "5m"
-				},
-				"aggs": {
-					"error_logs": {
-					"filter": {
-						"term": {
-						"Level": "Error"
-						}
-					}
-					}
-				}
-				}
-			}
-		}`),
+		"baseUrl": env.GetString("CORALOGIX_BASE_URL", ""),
+		"apiKey":  env.GetString("CORALOGIX_API_KEY", ""),
+		"query":   env.GetString("CORALOGIX_QUERY", ""),
 	}
 
 	jsonBytes, e := json.Marshal(msg)
@@ -146,7 +110,7 @@ func TestRunIteration(t *testing.T) {
 
 	runMeasurement := plugin.Run(&v1alpha1.AnalysisRun{}, v1alpha1.Metric{
 		Provider: v1alpha1.MetricProvider{
-			Plugin: map[string]json.RawMessage{"argoproj-labs/opensearch-metric-plugin": json.RawMessage(jsonStr)},
+			Plugin: map[string]json.RawMessage{"argoproj-labs/coralogix-metric-plugin": json.RawMessage(jsonStr)},
 		},
 		SuccessCondition: "result[len(result)-1] <= result[len(result)-2]",
 	})
