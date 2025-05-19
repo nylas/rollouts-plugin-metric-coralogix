@@ -21,4 +21,4 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o rollouts-
 FROM quay.io/argoproj/argo-rollouts:v1.8.2
 
 # Copy the plugin binary with permissions
-COPY --from=builder --chmod=755 /build/rollouts-plugin-metric-coralogix-linux-amd64 /home/argo-rollouts/plugin-bin/ 
+COPY --from=builder --chmod=755 /build/rollouts-plugin-metric-coralogix-linux-amd64 /home/plugins-temp/ 
