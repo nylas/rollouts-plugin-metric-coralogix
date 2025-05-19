@@ -141,3 +141,17 @@ Coralogix Data Prime query should response like below:
 ## Credit
 
 The development of this plugin was inspired by the [Argo Rollouts Prometheus Metric Plugin](https://github.com/argoproj-labs/rollouts-plugin-metric-sample-prometheus). Leveraging the knowledge and design principles from the Prometheus plugin, this Coralogix Metric Plugin was created to provide similar functionality for Coralogix metrics. The foundational concepts and architecture were adapted to suit the specific requirements and capabilities of Coralogix Data Prime, ensuring seamless integration and reliable performance within the Argo Rollouts ecosystem.
+
+## Building Custom Argo Rollouts Image
+
+You can build a custom Argo Rollouts image that includes this plugin by creating a Dockerfile that extends the official Argo Rollouts image. Here's an example:
+
+To build the image:
+
+```bash
+# Build for AMD64 (even on ARM machines)
+docker buildx build --platform linux/amd64 -t your-registry/argo-rollouts-coralogix:latest .
+```
+
+After building, you can use this custom image in your Kubernetes deployment by updating the Argo Rollouts controller deployment
+
