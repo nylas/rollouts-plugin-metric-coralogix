@@ -1,18 +1,18 @@
-# rollouts-plugin-metric-opensearch
+# rollouts-plugin-metric-coralogix
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/argoproj-labs/rollouts-plugin-metric-opensearch)](https://goreportcard.com/report/github.com/argoproj-labs/rollouts-plugin-metric-opensearch)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/argoproj-labs/rollouts-plugin-metric-opensearch/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/argoproj-labs/rollouts-plugin-metric-coralogix)](https://goreportcard.com/report/github.com/argoproj-labs/rollouts-plugin-metric-coralogix)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/argoproj-labs/rollouts-plugin-metric-coralogix/blob/master/LICENSE)
 
-The `rollouts-plugin-metric-opensearch` is an OpenSearch plugin designed for use with the Argo Rollouts plugin system. This plugin enables the integration of OpenSearch metrics into Argo Rollouts, allowing for advanced metric analysis and monitoring during application rollouts.
+The `rollouts-plugin-metric-coralogix` is a Coralogix Data Prime plugin designed for use with the Argo Rollouts plugin system. This plugin enables the integration of Coralogix metrics into Argo Rollouts, allowing for advanced metric analysis and monitoring during application rollouts.
 
 > [!IMPORTANT]
-> The OpenSearch Metric Plugin relies on aggregation query results to function correctly. Aggregation queries in OpenSearch allow for the computation of metrics, such as averages, sums, and counts, over a set of documents. This plugin specifically requires the presence of an aggregation block in the query results to operate. If the query results do not contain an aggregation block, the plugin will be unable to process the data and will not function as intended. Therefore, it is essential to ensure that all queries used with this plugin include the necessary aggregation blocks to enable accurate metric analysis and monitoring.
+> The Coralogix Metric Plugin relies on Data Prime query results to function correctly. Data Prime queries in Coralogix allow for the computation of metrics, such as averages, sums, and counts, over a set of logs. This plugin specifically requires the presence of an aggregation block in the query results to operate. If the query results do not contain an aggregation block, the plugin will be unable to process the data and will not function as intended. Therefore, it is essential to ensure that all queries used with this plugin include the necessary aggregation blocks to enable accurate metric analysis and monitoring.
 
 ## Features
 
-- **Metric Integration:** Seamlessly integrates OpenSearch metrics with Argo Rollouts.
+- **Metric Integration:** Seamlessly integrates Coralogix metrics with Argo Rollouts.
 
-- **Custom Queries:** Supports custom OpenSearch queries for flexible metric retrieval.
+- **Custom Queries:** Supports custom Coralogix Data Prime queries for flexible metric retrieval.
 
 - **Error Handling:** Robust error handling to ensure reliable metric collection.
 
@@ -25,13 +25,13 @@ To build the plugin, use the following commands:
 ### Release Build
 
 ```bash
-make build-rollouts-plugin-metric-opensearch
+make build-rollouts-plugin-metric-coralogix
 ```
 
 ### Debug Build
 
 ```bash
-make build-rollouts-plugin-metric-opensearch-debug
+make build-rollouts-plugin-metric-coralogix-debug
 ```
 
 ### Attaching a debugger to debug build
@@ -64,7 +64,7 @@ metadata:
 data:
   plugins: |-
     metrics:
-    - name: "argoproj-labs/opensearch-metric-plugin" # name of the plugin uses the name to find this configuration, it must match the name required by the plugin
+    - name: "argoproj-labs/coralogix-metric-plugin" # name of the plugin uses the name to find this configuration, it must match the name required by the plugin
       location: "file://./my-custom-plugin" # supports http(s):// urls and file://
 ```
 
@@ -81,21 +81,21 @@ metadata:
 data:
   plugins: |-
     metrics:
-    - name: "argoproj-labs/opensearch-metric-plugin" # name of the plugin uses the name to find this configuration, it must match the name required by the plugin
-      location: "https://github.com/argoproj-labs/rollouts-plugin-metric-opensearch/releases/download/v0.0.1/rollouts-plugin-metric-opensearch-linux-amd64" # supports http(s):// urls and file://
+    - name: "argoproj-labs/coralogix-metric-plugin" # name of the plugin uses the name to find this configuration, it must match the name required by the plugin
+      location: "https://github.com/argoproj-labs/rollouts-plugin-metric-coralogix/releases/download/v0.0.1/rollouts-plugin-metric-coralogix-linux-amd64" # supports http(s):// urls and file://
       sha256: "08f588b1c799a37bbe8d0fc74cc1b1492dd70b2c" #optional sha256 checksum of the plugin executable
 ```
 
 ### Sample Analysis Template
 
-The `successCondition` checks that the error count in the last 5 minutes should be lower than or equal to the error count in the previous 5 minutes.
+The `successCondition` checks that the success ratio of HTTP requests (excluding 500, 502, and 503 status codes) is above a certain threshold.
 
 > [!TIP]
-> Note: The fields `successCondition`, `"gte": "now-10m/m"`, `"fixed_interval": "5m"`, and `"Level": "Error"` can be configured by your check actions. For example, if you want to check the **"Warning"** log count over the last 15 minutes, you can adjust these fields accordingly: set `"gte": "now-30m/m"`, `"fixed_interval": "15m"`, and `"Level": "Warning"`.
+> Note: The fields `successCondition`, `container.image.tag`, and HTTP status codes can be configured based on your needs. For example, you might want to monitor different versions or different HTTP status codes.
 
 An example for this sample plugin below.
 
-```
+```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
@@ -106,95 +106,52 @@ spec:
   metrics:
     - name: success-rate
       interval: 10s
-      successCondition: result[len(result)-1] <= result[len(result)-2]
+      successCondition: result >= 0.95  # 95% success rate threshold
       failureLimit: 2
       count: 3
       provider:
         plugin:
-          argoproj-labs/opensearch-metric-plugin:
-            address: http://localhost:9200/
-            username: foo
-            password: bar
-            insecureSkipVerify: false
-            index: sample-index
+          argoproj-labs/coralogix-metric-plugin:
+            address: https://api.coralogix.com
+            apiKey: your-api-key
+            applicationName: your-app-name
+            subsystemName: your-subsystem
             query: |
-              {
-                "size": 0,
-                "query": {
-                  "range": {
-                    "@timestamp": {
-                      "gte": "now-10m/m",
-                      "lt": "now/m"
-                    }
-                  }
-                },
-                "aggs": {
-                  "logs_per_5min": {
-                    "date_histogram": {
-                      "field": "@timestamp",
-                      "fixed_interval": "5m"
-                    },
-                    "aggs": {
-                      "error_logs": {
-                        "filter": {
-                          "term": {
-                            "Level": "Error"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+              source logs | 
+              filter $d.kubernetes['container.image.tag'] == 'v3.0.44-rc28' | 
+              groupby true 
+              aggregate count_if($d.log_processed.http_status != null && $d.log_processed.http_status:number != 500 && $d.log_processed.http_status:number != 502 && $d.log_processed.http_status:number != 503) as $d.count_success, 
+              count_if($d.log_processed.http_status != null) as $d.count_all | 
+              create $d.ratio from $d.count_success / $d.count_all
 ```
 
 ### Sample Analysis Result
 
-Opensearch query should response like below:
+Coralogix Data Prime query should response like below:
 
-```
+```json
 {
-  "took": 2057,
-  "timed_out": false,
-  "_shards": {
-    "total": 1,
-    "successful": 1,
-    "skipped": 0,
-    "failed": 0
-  },
-  "hits": {
-    "total": {
-      "value": 10000,
-      "relation": "gte"
-    },
-    "max_score": null,
-    "hits": []
-  },
-  "aggregations": {
-    "logs_per_5min": {
-      "buckets": [
-        {
-          "key_as_string": "2024-10-25T14:00:00.000Z",
-          "key": 1729864800000,
-          "doc_count": 523779,
-          "error_logs": {
-            "doc_count": 0
-          }
-        },
-        {
-          "key_as_string": "2024-10-25T14:05:00.000Z",
-          "key": 1729865100000,
-          "doc_count": 343716,
-          "error_logs": {
-            "doc_count": 0
-          }
-        }
-      ]
-    }
-  }
+  "_expr0": true,
+  "count_all": 411671,
+  "count_success": 411671,
+  "ratio": 1
 }
 ```
 
 ## Credit
 
-The development of this plugin was inspired by the [Argo Rollouts Prometheus Metric Plugin](https://github.com/argoproj-labs/rollouts-plugin-metric-sample-prometheus). Leveraging the knowledge and design principles from the Prometheus plugin, this OpenSearch Metric Plugin was created to provide similar functionality for OpenSearch metrics. The foundational concepts and architecture were adapted to suit the specific requirements and capabilities of OpenSearch, ensuring seamless integration and reliable performance within the Argo Rollouts ecosystem.
+The development of this plugin was inspired by the [Argo Rollouts Prometheus Metric Plugin](https://github.com/argoproj-labs/rollouts-plugin-metric-sample-prometheus). Leveraging the knowledge and design principles from the Prometheus plugin, this Coralogix Metric Plugin was created to provide similar functionality for Coralogix metrics. The foundational concepts and architecture were adapted to suit the specific requirements and capabilities of Coralogix Data Prime, ensuring seamless integration and reliable performance within the Argo Rollouts ecosystem.
+
+## Building Custom Argo Rollouts Image
+
+You can build a custom Argo Rollouts image that includes this plugin by creating a Dockerfile that extends the official Argo Rollouts image. Here's an example:
+
+To build the image:
+
+```bash
+# Build for AMD64 (even on ARM machines)
+docker buildx build --platform linux/amd64 -t your-registry/argo-rollouts-coralogix:latest .
+```
+
+After building, you can use this custom image in your Kubernetes deployment by updating the Argo Rollouts controller deployment
+
