@@ -1,8 +1,6 @@
 module github.com/argoproj-labs/rollouts-plugin-metric-opensearch
 
-go 1.21
-
-toolchain go1.21.1
+go 1.23.0
 
 replace github.com/argoproj/argo-rollouts => github.com/zachaller/argo-rollouts v1.2.1-0.20230227164909-1b6c165bb002
 
@@ -14,10 +12,7 @@ require (
 	github.com/tj/assert v0.0.3
 )
 
-require (
-	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
-)
+require github.com/google/go-cmp v0.6.0 // indirect
 
 require (
 	github.com/antonmedv/expr v1.12.1 // indirect
@@ -49,11 +44,11 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/common v0.40.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/oauth2 v0.4.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/term v0.30.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
@@ -67,7 +62,7 @@ require (
 	k8s.io/client-go v0.24.2 // indirect
 	k8s.io/klog/v2 v2.70.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20220627174259-011e075b9cb8 // indirect
-	k8s.io/utils v0.0.0-20220706174534-f6158b442e7c // indirect
+	k8s.io/utils v0.0.0-20220706174534-f6158b442e7c
 	sigs.k8s.io/json v0.0.0-20220525155127-227cbc7cc124 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
