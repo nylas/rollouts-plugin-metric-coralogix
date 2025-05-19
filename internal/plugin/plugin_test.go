@@ -96,9 +96,9 @@ func TestRunIteration(t *testing.T) {
 	}
 
 	msg := map[string]interface{}{
-		"baseUrl": env.GetString("CORALOGIX_BASE_URL", ""),
+		"baseUrl": env.GetString("CORALOGIX_BASE_URL", "https://ng-api-http.coralogix.us"),
 		"apiKey":  env.GetString("CORALOGIX_API_KEY", ""),
-		"query":   env.GetString("CORALOGIX_QUERY", ""),
+		"query":   env.GetString("CORALOGIX_QUERY", "source logs last 7d | filter $l.applicationname == 'us-central1-prod' && $l.subsystemname == 'passthru-api' && $d.kubernetes['container.image.tag'] != null | groupby $d.kubernetes['container.image.tag'] aggregate count_if($d.log_processed.http_status != null && $d.log_processed.http_status:number != 500 && $d.log_processed.http_status:number != 502 && $d.log_processed.http_status:number != 503) as $d.count_success, count_if($d.log_processed.http_status != null) as $d.count_all | create $d.ratio from $d.count_success / $d.count_all"),
 	}
 
 	jsonBytes, e := json.Marshal(msg)
@@ -112,7 +112,7 @@ func TestRunIteration(t *testing.T) {
 		Provider: v1alpha1.MetricProvider{
 			Plugin: map[string]json.RawMessage{"argoproj-labs/coralogix-metric-plugin": json.RawMessage(jsonStr)},
 		},
-		SuccessCondition: "result[len(result)-1] <= result[len(result)-2]",
+		SuccessCondition: "result[len(result)-1] > .9999 && (len(result) > 1 ? result[len(result)-1] >= result[len(result)-2] - 0.0001 : true)",
 	})
 	fmt.Println(runMeasurement)
 	assert.Equal(t, "Successful", string(runMeasurement.Phase))

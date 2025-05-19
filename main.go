@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/argoproj-labs/rollouts-plugin-metric-opensearch/internal/plugin"
+	"github.com/argoproj-labs/rollouts-plugin-metric-coralogix/internal/plugin"
 	rolloutsPlugin "github.com/argoproj/argo-rollouts/metricproviders/plugin/rpc"
 	goPlugin "github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
@@ -18,7 +18,7 @@ var handshakeConfig = goPlugin.HandshakeConfig{
 }
 
 func main() {
-	logCtx := *log.WithFields(log.Fields{"plugin": "opensearch"})
+	logCtx := *log.WithFields(log.Fields{"plugin": "coralogix"})
 
 	rpcPluginImp := &plugin.RpcPlugin{
 		LogCtx: logCtx,

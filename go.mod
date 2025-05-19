@@ -1,4 +1,4 @@
-module github.com/argoproj-labs/rollouts-plugin-metric-opensearch
+module github.com/argoproj-labs/rollouts-plugin-metric-coralogix
 
 go 1.21
 
@@ -12,12 +12,10 @@ require (
 	github.com/prometheus/client_golang v1.14.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tj/assert v0.0.3
+	k8s.io/utils v0.0.0-20220706174534-f6158b442e7c
 )
 
-require (
-	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
-)
+require github.com/google/go-cmp v0.6.0 // indirect
 
 require (
 	github.com/antonmedv/expr v1.12.1 // indirect
@@ -45,7 +43,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/run v1.0.0 // indirect
-	github.com/opensearch-project/opensearch-go v1.1.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/common v0.40.0 // indirect
 	github.com/stretchr/testify v1.9.0 // indirect
@@ -67,7 +64,6 @@ require (
 	k8s.io/client-go v0.24.2 // indirect
 	k8s.io/klog/v2 v2.70.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20220627174259-011e075b9cb8 // indirect
-	k8s.io/utils v0.0.0-20220706174534-f6158b442e7c // indirect
 	sigs.k8s.io/json v0.0.0-20220525155127-227cbc7cc124 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
