@@ -116,6 +116,7 @@ spec:
             apiKey: your-api-key
             applicationName: your-app-name
             subsystemName: your-subsystem
+            queryTier: TIER_FREQUENT_SEARCH  # Optional: TIER_FREQUENT_SEARCH (default) or TIER_ARCHIVE
             query: |
               source logs | 
               filter $d.kubernetes['container.image.tag'] == 'v3.0.44-rc28' | 
@@ -124,6 +125,19 @@ spec:
               count_if($d.log_processed.http_status != null) as $d.count_all | 
               create $d.ratio from $d.count_success / $d.count_all
 ```
+
+### Configuration Parameters
+
+| Parameter | Description | Required | Default |
+|-----------|-------------|----------|---------|
+| `address` | The Coralogix API endpoint URL | Yes | - |
+| `apiKey` | Your Coralogix API key | Yes | - |
+| `query` | The Data Prime query to execute | Yes | - |
+| `queryTier` | The query execution tier: `TIER_FREQUENT_SEARCH` or `TIER_ARCHIVE` | No | `TIER_FREQUENT_SEARCH` |
+
+The `queryTier` parameter allows you to specify which tier to use for query execution:
+- `TIER_FREQUENT_SEARCH`: For querying recent data (default)
+- `TIER_ARCHIVE`: For querying archived/historical data
 
 ### Sample Analysis Result
 

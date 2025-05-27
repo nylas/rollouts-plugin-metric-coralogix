@@ -18,6 +18,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// QueryTier defines the tier for the query execution
+type QueryTier string
+
+const (
+	// TierFrequentSearch represents the frequent search tier
+	TierFrequentSearch QueryTier = "TIER_FREQUENT_SEARCH"
+	// TierArchive represents the archive tier
+	TierArchive QueryTier = "TIER_ARCHIVE"
+)
+
 // Here is a real implementation of MetricsPlugin
 type RpcPlugin struct {
 	LogCtx log.Entry
@@ -31,6 +41,8 @@ type Config struct {
 	APIKey string `json:"apiKey,omitempty" protobuf:"bytes,2,opt,name=apiKey"`
 	// Query is the DataPrime query to execute
 	Query string `json:"query,omitempty" protobuf:"bytes,3,opt,name=query"`
+	// QueryTier defines which tier to use for query execution (TIER_FREQUENT_SEARCH or TIER_ARCHIVE)
+	QueryTier QueryTier `json:"queryTier,omitempty" protobuf:"bytes,4,opt,name=queryTier"`
 }
 
 func (g *RpcPlugin) InitPlugin() types.RpcError {

@@ -11,14 +11,22 @@ import (
 )
 
 type CoralogixClient struct {
-	baseUrl string
-	apiKey  string
+	baseUrl   string
+	apiKey    string
+	queryTier QueryTier
 }
 
 func newCoralogixClient(config Config) (*CoralogixClient, error) {
+	// Default to TierFrequentSearch if not specified
+	queryTier := config.QueryTier
+	if queryTier == "" {
+		queryTier = TierFrequentSearch
+	}
+
 	return &CoralogixClient{
-		baseUrl: config.BaseUrl,
-		apiKey:  config.APIKey,
+		baseUrl:   config.BaseUrl,
+		apiKey:    config.APIKey,
+		queryTier: queryTier,
 	}, nil
 }
 
@@ -34,12 +42,16 @@ type QueryResponse struct {
 
 func (c *CoralogixClient) executeQuery(ctx context.Context, query string) ([]interface{}, error) {
 	type queryRequest struct {
+		Metadata struct {
+			Tier QueryTier `json:"tier,omitempty"`
+		} `json:"metadata"`
 		Query string `json:"query"`
 	}
 
 	reqBody := queryRequest{
 		Query: query,
 	}
+	reqBody.Metadata.Tier = c.queryTier
 
 	reqBytes, err := json.Marshal(reqBody)
 	if err != nil {
