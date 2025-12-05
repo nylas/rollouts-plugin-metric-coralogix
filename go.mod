@@ -10,7 +10,7 @@ require (
 	github.com/argoproj/argo-rollouts v1.7.2
 	github.com/hashicorp/go-plugin v1.4.8
 	github.com/prometheus/client_golang v1.14.0
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.1
 	github.com/tj/assert v0.0.3
 	k8s.io/utils v0.0.0-20220706174534-f6158b442e7c
 )
