@@ -21,7 +21,7 @@ The `rollouts-plugin-metric-coralogix` is a Coralogix Data Prime plugin designed
 ## Build & Debug
 
 The controller image and plugin API target Argo Rollouts **v1.10.0**. Building
-requires Go **1.26.1** or newer. Upgrade tracking:
+requires Go **1.26.8** or newer. Upgrade tracking:
 [TW-6901](https://nylas.atlassian.net/browse/TW-6901).
 
 Run `make test` before building. Tests use local fixtures and an executable RPC
