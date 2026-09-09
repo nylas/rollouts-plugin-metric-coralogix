@@ -12,8 +12,9 @@ controller image digest and is not referenced by any active ApplicationSet.
 
 The initial custom image scan identified a vulnerable Go 1.26.1 standard library
 in the plugin binary. The plugin build now targets patched Go 1.26.8 and gRPC
-1.83.1. Re-run the image scan on the final built artifact before publishing it
-for deployment.
+1.83.1. The rebuilt image passes local tests and container version checks. Its
+final Docker Scout scan reports no critical findings and seven high advisory
+IDs, matching the advisory IDs found in the upstream controller scan.
 
 An independent Docker Scout scan of the upstream linux/amd64 controller image
 `quay.io/argoproj/argo-rollouts:v1.10.0` found **7 high-severity package findings**
@@ -22,13 +23,16 @@ and no critical findings. The pinned multi-platform base-image digest is
 
 | Package in upstream controller | Findings | Fixed versions reported by scanner |
 | --- | --- | --- |
-| `google.golang.org/grpc` 1.80.0 | CVE-2026-84445, CVE-2026-84304, GHSA-hrxh-6v49-42gf | 1.83.1 covers all three |
+| `google.golang.org/grpc` 1.80.0 | CVE-2026-84445, CVE-2026-84304, GHSA-hrxh-6v49-42gf | Initial reported thresholds: 1.82.2, 1.83.1, 1.82.1 |
 | `golang.org/x/crypto` 0.53.0 | CVE-2026-56854, CVE-2026-56855, CVE-2026-78662 | 0.56.0 covers all three |
 | `go.opentelemetry.io/otel` 1.39.0 | CVE-2026-29181 | 1.41.0 |
 
 These are package-level findings, not proof of reachable exploitation in our
 deployment. Updating this repository's plugin dependencies does not patch the
-separate upstream controller executable. Keep the PR in draft and resolve or
+separate upstream controller executable. The final scan also associates
+CVE-2026-84445 with the plugin's gRPC 1.83.1, despite the initial reported fixed
+threshold of 1.82.2. Reconcile that scanner/advisory discrepancy before declaring
+the plugin free of high findings. Keep the PR in draft and resolve or
 record the approved reachability/risk assessment before staging activation;
 do not report the combined image as free of high vulnerabilities.
 
