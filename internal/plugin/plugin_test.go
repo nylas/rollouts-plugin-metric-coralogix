@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/argoproj/argo-rollouts/metricproviders/plugin/rpc"
-	"k8s.io/utils/env"
 
 	"github.com/argoproj/argo-rollouts/utils/plugin/types"
 	log "github.com/sirupsen/logrus"
@@ -21,7 +22,7 @@ import (
 var testHandshake = goPlugin.HandshakeConfig{
 	ProtocolVersion:  1,
 	MagicCookieKey:   "ARGO_ROLLOUTS_RPC_PLUGIN",
-	MagicCookieValue: "metrics",
+	MagicCookieValue: "metricprovider",
 }
 
 func pluginClient(t *testing.T) (rpc.MetricProviderPlugin, goPlugin.ClientProtocol, func(), chan struct{}) {
@@ -87,39 +88,67 @@ func pluginClient(t *testing.T) (rpc.MetricProviderPlugin, goPlugin.ClientProtoc
 }
 
 func TestRunIteration(t *testing.T) {
-	plugin, _, cancel, closeCh := pluginClient(t)
-	defer cancel()
+	for _, test := range []struct {
+		name   string
+		body   string
+		status int
+		phase  v1alpha1.AnalysisPhase
+	}{
+		{"successful analysis", "{}\n{\"result\":{\"results\":[{\"userData\":\"{\\\"ratio\\\":1}\"}]}}\n", http.StatusOK, v1alpha1.AnalysisPhaseSuccessful},
+		{"failed analysis", "{}\n{\"result\":{\"results\":[{\"userData\":\"{\\\"ratio\\\":0.5}\"}]}}\n", http.StatusOK, v1alpha1.AnalysisPhaseFailed},
+		{"malformed response", "not json", http.StatusOK, v1alpha1.AnalysisPhaseError},
+		{"upstream failure", "upstream unavailable", http.StatusServiceUnavailable, v1alpha1.AnalysisPhaseError},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				assert.Equal(t, "/api/v1/dataprime/query", r.URL.Path)
+				var request struct {
+					Query    string `json:"query"`
+					Metadata struct {
+						Tier QueryTier `json:"tier"`
+					} `json:"metadata"`
+				}
+				assert.NoError(t, json.NewDecoder(r.Body).Decode(&request))
+				assert.Equal(t, "source logs | count", request.Query)
+				assert.Equal(t, TierFrequentSearch, request.Metadata.Tier)
+				w.WriteHeader(test.status)
+				fmt.Fprint(w, test.body)
+			}))
+			defer server.Close()
+			plugin, _, cancel, closeCh := pluginClient(t)
+			defer cancel()
 
-	err := plugin.InitPlugin()
-	if err.Error() != "" {
-		t.Fail()
+			err := plugin.InitPlugin()
+			if err.Error() != "" {
+				t.Fail()
+			}
+
+			msg := map[string]interface{}{
+				"baseUrl":   server.URL,
+				"queryTier": TierFrequentSearch,
+				"query":     "source logs | count",
+			}
+
+			jsonBytes, e := json.Marshal(msg)
+			if e != nil {
+				t.Fail()
+			}
+
+			jsonStr := string(jsonBytes)
+
+			runMeasurement := plugin.Run(&v1alpha1.AnalysisRun{}, v1alpha1.Metric{
+				Provider: v1alpha1.MetricProvider{
+					Plugin: map[string]json.RawMessage{"argoproj-labs/coralogix-metric-plugin": json.RawMessage(jsonStr)},
+				},
+				SuccessCondition: "result[len(result)-1] > .9999 && (len(result) > 1 ? result[len(result)-1] >= result[len(result)-2] - 0.0001 : true)",
+			})
+			assert.Equal(t, test.phase, runMeasurement.Phase)
+
+			cancel()
+			<-closeCh
+		})
 	}
-
-	msg := map[string]interface{}{
-		"baseUrl":   env.GetString("CORALOGIX_BASE_URL", "https://ng-api-http.coralogix.us"),
-		"apiKey":    env.GetString("CORALOGIX_API_KEY", ""),
-		"queryTier": env.GetString("CORALOGIX_QUERY_TIER", "TIER_FREQUENT_SEARCH"),
-		"query":     env.GetString("CORALOGIX_QUERY", "source logs last 7d | filter $l.applicationname == 'us-central1-prod' && $l.subsystemname == 'passthru-api' && $d.kubernetes['container.image.tag'] != null | groupby $d.kubernetes['container.image.tag'] aggregate count_if($d.log_processed.http_status != null && $d.log_processed.http_status:number != 500 && $d.log_processed.http_status:number != 502 && $d.log_processed.http_status:number != 503) as $d.count_success, count_if($d.log_processed.http_status != null) as $d.count_all | create $d.ratio from $d.count_success / $d.count_all"),
-	}
-
-	jsonBytes, e := json.Marshal(msg)
-	if e != nil {
-		t.Fail()
-	}
-
-	jsonStr := string(jsonBytes)
-
-	runMeasurement := plugin.Run(&v1alpha1.AnalysisRun{}, v1alpha1.Metric{
-		Provider: v1alpha1.MetricProvider{
-			Plugin: map[string]json.RawMessage{"argoproj-labs/coralogix-metric-plugin": json.RawMessage(jsonStr)},
-		},
-		SuccessCondition: "result[len(result)-1] > .9999 && (len(result) > 1 ? result[len(result)-1] >= result[len(result)-2] - 0.0001 : true)",
-	})
-	fmt.Println(runMeasurement)
-	assert.Equal(t, "Successful", string(runMeasurement.Phase))
-
-	cancel()
-	<-closeCh
 }
 
 func TestPluginClosedConnection(t *testing.T) {

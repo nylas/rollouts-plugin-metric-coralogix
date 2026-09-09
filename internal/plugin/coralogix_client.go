@@ -80,7 +80,7 @@ func (c *CoralogixClient) executeQuery(ctx context.Context, query string) ([]int
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request failed with status %d: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("query service returned status %d", resp.StatusCode)
 	}
 
 	// Split the NDJSON response into individual JSON objects
@@ -106,9 +106,6 @@ func (c *CoralogixClient) executeQuery(ctx context.Context, query string) ([]int
 		}
 		results[i] = userData
 	}
-
-	// Print the final processed results
-	fmt.Printf("Coralogix query results: %+v\n", results)
 
 	return results, nil
 }

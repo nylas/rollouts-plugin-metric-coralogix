@@ -1,0 +1,5 @@
+.git
+.claude
+coverage.out
+rollouts-plugin-metric-coralogix
+rollouts-plugin-metric-coralogix-*

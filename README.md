@@ -20,6 +20,19 @@ The `rollouts-plugin-metric-coralogix` is a Coralogix Data Prime plugin designed
 
 ## Build & Debug
 
+The controller image and plugin API target Argo Rollouts **v1.10.0**. Building
+requires Go **1.26.1** or newer. Upgrade tracking:
+[TW-6901](https://nylas.atlassian.net/browse/TW-6901).
+
+Run `make test` before building. Tests use local fixtures and an executable RPC
+handshake; no Coralogix credentials or production queries are needed. These
+checks do not replace staging validation against Coralogix and real rollouts.
+
+Deploy the resulting image to `uc1-stg-sync` first, pin its immutable digest,
+and record analysis success/failure, promotion, abort, rollback, pause/resume,
+and controller-restart results on TW-6901 before production promotion. Keep the
+previous image and chart/CRD compatibility assessment available for recovery.
+
 To build the plugin, use the following commands:
 
 ### Release Build
@@ -168,4 +181,3 @@ docker buildx build --platform linux/amd64 -t your-registry/argo-rollouts-coralo
 ```
 
 After building, you can use this custom image in your Kubernetes deployment by updating the Argo Rollouts controller deployment
-
