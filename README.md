@@ -171,13 +171,26 @@ The development of this plugin was inspired by the [Argo Rollouts Prometheus Met
 
 ## Building Custom Argo Rollouts Image
 
-You can build a custom Argo Rollouts image that includes this plugin by creating a Dockerfile that extends the official Argo Rollouts image. Here's an example:
-
-To build the image:
+The Dockerfile rebuilds the controller and dashboard from the pinned v1.10.0
+source commit with the security dependency locks in `build/argo-rollouts/`.
+It does not inherit the upstream executables, which retain vulnerable Go
+dependencies even when this metric plugin is patched. Both final images use
+a digest-pinned distroless runtime as UID 999. Build stages stay native to the
+builder; runtime executables target Linux/AMD64.
+The image checks require Docker Buildx/Scout; the smoke script also uses curl
+and jq, and never mounts real Kubernetes credentials.
 
 ```bash
-# Build for AMD64 (even on ARM machines)
-docker buildx build --platform linux/amd64 -t your-registry/argo-rollouts-coralogix:latest .
+make test
+make test-upstream
+make image-controller image-dashboard
+make scan-images
+make smoke-images
 ```
 
-After building, you can use this custom image in your Kubernetes deployment by updating the Argo Rollouts controller deployment
+The scan gate fails for critical/high findings only; medium/low remediation is
+outside this change's scope. No findings are suppressed. See
+`build/argo-rollouts/README.md` for dependency provenance and `UPGRADE.md` for
+validation evidence. These commands do not publish images or deploy anything.
+The staging activation PR must pin both published image digests, not the local
+development tags.

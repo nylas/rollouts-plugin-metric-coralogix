@@ -8,6 +8,56 @@ The paired `unicorn-helm` candidate chart is
 `chart/argo-rollouts-1.10/chart` (upstream chart 2.43.1). It requires the published
 controller image digest and is not referenced by any active ApplicationSet.
 
+## Controller and dashboard security patch, 2026-09-15
+
+The latest candidate rebuilds **both** upstream executables from v1.10.0 commit
+`d90700ae8d71d141561f0c546e19f999bb335cbd`, using the dependency locks under
+`build/argo-rollouts/`. Go remains 1.26.8; gRPC is 1.83.2, `x/crypto` is 0.56.0,
+and the required OpenTelemetry update is 1.44.0. No upstream application code
+is changed. The dashboard UI uses the upstream frozen pnpm lockfile. A fresh,
+digest-pinned distroless runtime avoids retaining the old executables in layers.
+
+Final Linux/AMD64 image scans using
+`docker scout cves --exit-code --only-severity critical,high` passed with
+**zero critical and zero high findings in each image**, without suppressions.
+The baseline controller and dashboard each had the seven high advisory IDs
+listed below. Medium/low remediation is explicitly out of scope; this filtered
+scan does not establish that medium/low findings are absent or audit bundled
+JavaScript source dependencies.
+
+Local image identities (Docker config IDs, **not published registry digests**):
+
+| Image tag | Config ID |
+| --- | --- |
+| `argo-rollouts-coralogix:TW-6901-security` | `sha256:2fdd8669506d838d37d8d956f75c0fe67dfc1e0a7c7fb38c0b24d19d3fedfc9c` |
+| `argo-rollouts-dashboard:TW-6901-security` | `sha256:78fd176521630eebaec3737c44ce00c96e29865ee9804d212e02fbc4c039d687` |
+
+Uncached plugin tests pass. Both images build and report
+`v1.10.0+d90700a.dirty`, marking the dependency-patched upstream source. The
+local smoke checks verify AMD64, UID 999, dashboard startup, HTML, embedded
+JavaScript and the HTTP-to-gRPC version endpoint using only a synthetic
+kubeconfig; no cluster access is exercised.
+
+The Docker upstream-test build ran out of Docker disk space while compiling.
+The same selected upstream suites **passed uncached** on the macOS/ARM64 host
+with Go 1.26.8 and the identical patched module files:
+
+```sh
+env GOTOOLCHAIN=go1.26.8 CGO_ENABLED=0 go test -mod=readonly -short -count=1 -p 2 \
+  ./controller/... ./rollout/... ./metricproviders/... ./server/...
+```
+
+This covers controller/reconciliation, traffic-routing, metric-provider and
+dashboard-server unit tests; it is not Kubernetes end-to-end testing. Linux
+runtime validation is provided by the two AMD64 builds and image smoke checks.
+No Docker data was pruned. The Docker test target now limits build parallelism.
+
+The existing candidate Helm chart still references the upstream dashboard.
+Before activation, update it to require the **patched dashboard digest** as
+well as the controller digest. Neither artifact is published or deployed.
+Earlier dated sections below are historical evidence, not the current scan
+result or PR state. The PR is open for review, not approved for deployment.
+
 ## Security review, 2026-09-09
 
 The initial custom image scan identified a vulnerable Go 1.26.1 standard library
@@ -29,9 +79,9 @@ and no critical findings. The pinned multi-platform base-image digest is
 
 These are package-level findings, not proof of reachable exploitation in our
 deployment. Updating this repository's plugin dependencies does not patch the
-separate upstream controller executable. Keep the PR in draft and resolve or
-record the approved reachability/risk assessment before staging activation;
-do not report the combined image as free of high vulnerabilities.
+separate upstream controller executable. At this stage the combined image
+still had high vulnerabilities; the September 15 rebuild above supersedes
+that security gate.
 
 ## Plugin gRPC update, 2026-09-11
 
@@ -60,9 +110,10 @@ Their security assessment and staging activation gates remain open.
 
 ## Remaining rollout gates
 
-1. Complete the upstream-controller security assessment, then publish a
-   traceable controller artifact and record its final digest and source commit.
-2. Activate the candidate chart only for `uc1-stg-sync` via a separate PR.
+1. Complete review/testing, publish both traceable patched artifacts, re-scan
+   the published images and record their registry digests and source commit.
+2. Require both patched image digests in the candidate chart, then activate
+   only for `uc1-stg-sync` via a separate PR.
 3. Run actual Coralogix analysis, promotion, abort/rollback, pause/resume,
    controller restart, traffic-routing, dashboard and CLI checks in staging.
 4. Observe normal staging deployments before promoting the same artifact to
